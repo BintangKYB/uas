@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bintang Aljabar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        nav a {
+            margin: 0 10px;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        section {
+            background: #fff;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        footer {
+            background: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 20px;
+        }
+
+        input {
+            padding: 5px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Selamat datang di Bintang Aljabar</h1>
+        <nav>
+            <a href="#lessons">Penjelasan</a>
+            <a href="#tools">Mesin Aljabar</a>
+            <a href="#practice">Latihan</a>
+        </nav>
+    </header>
+    <main>
+        <section id="lessons">
+            <h2>Penjelasan: Menyelesaikan Persamaan</h2>
+            <p>Persamaan adalah pernyataan bahwa dua ekspresi adalah sama. Contoh: <strong>2x - 3 = 12</strong>.</p>
+            <ol>
+                <li>Tambahkan 3 pada kedua ruas: <strong>2x = 12 + 3</strong>.</li>
+                <li>Bagi dengan 2: <strong>x = 7.5</strong>.</li>
+            </ol>
+        </section>
+        <section id="tools">
+            <h2>Equation Solver</h2>
+            <label for="equation">Masukkan persamaan (contoh: 2x+4=6) _____Note:tanpa space</label><br>
+            <input type="text" id="equation" placeholder="Masukkan Persamaan">
+            <button id="solveEquation">Solve</button>
+            <p id="solution"></p>
+            <div id="explanation" style="color: #555; background: #f9f9f9; padding: 10px; border-radius: 5px; margin-top: 10px;"></div>
+        </section>
+        <section id="practice">
+            <h2>Latihan Persamaan</h2>
+            <p>Selamat mencoba menyelesaikan persamaan berikut:</p>
+            <p id="practiceEquation"></p>
+            <label for="practiceAnswer">Jawaban Anda:</label>
+            <input type="text" id="practiceAnswer" placeholder="Masukkan nilai x">
+            <button id="checkAnswer">Cek Jawaban</button>
+            <button id="newQuestion">Soal Baru</button>
+            <p id="feedback" style="margin-top: 10px;"></p>
+        </section>
+    </main>
+    <footer>
+        © 2024 Bintang Aljabar IKIP. All Rights Reserved.
+    </footer>
+    <script>
+        // Equation Solver
+        document.getElementById("solveEquation").addEventListener("click", () => {
+            const equation = document.getElementById("equation").value.trim();
+            const solution = document.getElementById("solution");
+            const explanation = document.getElementById("explanation");
+
+            try {
+                const [lhs, rhs] = equation.split("=").map(side => side.trim());
+                if (!lhs || !rhs) throw new Error("Format persamaan tidak valid");
+
+                const variableMatch = lhs.match(/[a-zA-Z]/);
+                if (!variableMatch) throw new Error("Tidak ada variabel dalam persamaan");
+                const variable = variableMatch[0];
+
+                let coefficient = 0;
+                let constant = 0;
+                const rhsValue = parseFloat(rhs);
+
+                if (isNaN(rhsValue)) throw new Error("RHS harus berupa angka yang valid");
+
+                const terms = lhs.split(/(?=[+-])/).map(term => term.trim());
+                terms.forEach(term => {
+                    if (term.includes(variable)) {
+                        const value = term.replace(variable, "").trim() || "1";
+                        coefficient += parseFloat(value);
+                    } else if (term !== "") {
+                        constant += parseFloat(term);
+                    }
+                });
+
+                let adjustedRHS = rhsValue;
+                let operation = constant > 0 ? "-" : "+";
+                adjustedRHS += constant > 0 ? -constant : Math.abs(constant);
+
+                let value = adjustedRHS / coefficient; 
+                value = Math.round(value * 100) / 100; // Pembulatan ke 2 desimal
+
+                solution.textContent = `${variable} = ${value}`;
+                explanation.innerHTML = `
+                    <strong>Langkah-langkah Penyelesaian:</strong><br>
+                    1. Persamaan awal: ${lhs} = ${rhs}.<br>
+                    2. ${operation === "-" ? "Kurangi" : "Tambah"} konstanta (${Math.abs(constant)}) ke kedua sisi:<br>
+                       &emsp; ${coefficient}${variable} = ${rhsValue} ${operation} ${Math.abs(constant)}.<br>
+                       &emsp; ${coefficient}${variable} = ${adjustedRHS}.<br>
+                    3. Bagi kedua sisi dengan koefisien (${coefficient}):<br>
+                       &emsp; ${variable} = ${adjustedRHS} / ${coefficient}.<br>
+                    4. Hasil akhir: ${variable} = ${value}.
+                `;
+            } catch (error) {
+                solution.textContent = `Error: ${error.message}`;
+                explanation.innerHTML = "";
+            }
+        });
+
+        // Practice Section
+        const generatePracticeEquation = () => {
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = Math.floor(Math.random() * 20) - 10;
+            const c = Math.floor(Math.random() * 20) - 10;
+            return { equation: `${a}x + ${b} = ${c}`, solution: Math.round(((c - b) / a) * 100) / 100 };
+        };
+
+        let currentPractice = generatePracticeEquation();
+        document.getElementById("practiceEquation").textContent = currentPractice.equation;
+
+        document.getElementById("checkAnswer").addEventListener("click", () => {
+            const userAnswer = parseFloat(document.getElementById("practiceAnswer").value.trim());
+            const feedback = document.getElementById("feedback");
+
+            if (isNaN(userAnswer)) {
+                feedback.textContent = "Masukkan jawaban yang valid.";
+                feedback.style.color = "red";
+                return;
+            }
+
+            if (Math.abs(userAnswer - currentPractice.solution) < 0.01) {
+                feedback.textContent = "Jawaban Anda benar!";
+                feedback.style.color = "green";
+            } else {
+                feedback.textContent = `Jawaban Anda salah. Jawaban yang benar adalah ${currentPractice.solution}.`;
+                feedback.style.color = "red";
+            }
+        });
+
+        document.getElementById("newQuestion").addEventListener("click", () => {
+            currentPractice = generatePracticeEquation();
+            document.getElementById("practiceEquation").textContent = currentPractice.equation;
+            document.getElementById("practiceAnswer").value = "";
+            document.getElementById("feedback").textContent = "";
+        });
+    </script>
+</body>
+</html>
